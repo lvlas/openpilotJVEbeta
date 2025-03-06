@@ -32,6 +32,18 @@ class CarController(CarControllerBase):
     self.lkas_control_bit_prev = False
     self.last_button_frame = 0
 
+    # Additional variables from xps for steering torque
+    self.ccframe = 0  # Added for xps compatibility
+    self.gone_fast_yet = False
+    self.timer = 0
+    self.steerErrorMod = False
+    self.steer_type = int(0)
+    self.steer_rate_limited = False
+    self.hightorqUnavailable = False
+    self.full_range_steer = False
+    self.mango_lat_active = True
+    self.mango_mode_active = self.mango_lat_active or self.full_range_steer
+
     self.packer = CANPacker(dbc_name)
     self.params = CarControllerParams(CP)
 
@@ -58,18 +70,76 @@ class CarController(CarControllerBase):
 
     # cruise buttons
     das_bus = 2 if self.CP.carFingerprint in RAM_CARS else 0
+    enabled = CC.enabled
 
-    # ACC cancellation
-    # if CC.cruiseControl.cancel:
-    #   self.last_button_frame = self.frame
-    #   can_sends.append(chryslercan.create_cruise_buttons(self.packer, CS.button_counter + 1, das_bus, cancel=True))
-    #
-    # # ACC resume from standstill
-    # elif CC.cruiseControl.resume:
-    #   self.last_button_frame = self.frame
-    #   can_sends.append(chryslercan.create_cruise_buttons(self.packer, CS.button_counter + 1, das_bus, resume=True))
+    # Steering torque logic from xps
+    wp_type = int(0)
+    self.hightorqUnavailable = False
 
-    # jvePilot
+    if self.full_range_steer:
+      wp_type = int(1)
+    if self.mango_lat_active:
+      wp_type = int(2)
+
+    if enabled:
+      if self.timer < 99 and wp_type == 1 and CS.out.vEgo < 65:
+        self.timer += 1
+      else:
+        self.timer = 99
+    else:
+      self.timer = 0
+
+    lkas_active = self.timer == 99 and (self.ccframe >= 500)
+
+    # Steer torque calculation from xps
+    new_steer = int(round(CC.actuators.steer * self.params.STEER_MAX))
+    apply_steer = apply_meas_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorqueEps, self.params)
+
+    if not self.mango_mode_active:
+      moving_fast = CS.out.vEgo > self.CP.minSteerSpeed
+      if CS.out.vEgo > (self.CP.minSteerSpeed - 0.5):
+        self.gone_fast_yet = True
+      elif CS.out.vEgo < (self.CP.minSteerSpeed - 3.0):
+        self.gone_fast_yet = False
+      lkas_active = moving_fast and enabled
+
+      if not lkas_active:
+        apply_steer = 0
+
+    self.steer_rate_limited = new_steer != apply_steer
+    self.apply_steer_last = apply_steer
+    self.steer_type = wp_type
+
+    if wp_type != 2:
+      self.steerErrorMod = CS.steerError if hasattr(CS, 'steerError') else CS.out.steerFaultPermanent
+      if self.steerErrorMod:
+        self.steer_type = int(0)
+    elif CS.out.steerFaultPermanent or CS.out.gearShifter not in (GearShifter.drive, GearShifter.low):
+      self.steer_type = int(0)
+
+    if (self.ccframe < 500) or \
+       (self.steer_type == int(0) and CS.out.gearShifter in (GearShifter.drive, GearShifter.low) and not CS.out.steerFaultPermanent and self.mango_lat_active):
+      self.hightorqUnavailable = True
+
+    # CAN messages for steering from xps
+    if (self.ccframe % 2 == 0) and wp_type == 2:  # 0.02s period
+      new_msg = chryslercan.create_mango_hud(
+          self.packer, False, CS.out.steerFaultPermanent, lkas_active, self.steer_type)  # Simplified, no apaActive/apaFault
+      can_sends.append(new_msg)
+
+    if (self.ccframe % 2 == 0) and wp_type != 2:  # Adjusted to match xps frequency
+      new_msg = chryslercan.create_lkas_hud(
+          self.packer, self.CP, lkas_active, CC.hudControl.visualAlert, self.hud_count, CS.lkas_car_model, CS.auto_high_beam,
+          CC.enabled or CC.jvePilotState.carControl.aolcAvailable, CS.out.cruiseState.available)
+      can_sends.append(new_msg)
+
+    if self.ccframe % 25 == 0:
+      self.hud_count += 1
+
+    new_msg = chryslercan.create_lkas_command(self.packer, int(apply_steer), lkas_active, CS.lkas_counter)
+    can_sends.append(new_msg)
+
+    # jvePilot button handling
     if button_pressed(CS.out, ButtonType.lkasToggle, False):
       CS.lkas_button_light = not CS.lkas_button_light
       self.settingsParams.put_nonblocking("jvePilot.settings.lkasButtonLight", "1" if CS.lkas_button_light else "0")
@@ -78,45 +148,6 @@ class CarController(CarControllerBase):
       new_msg = chryslercan.create_lkas_heartbit(self.packer, lkas_disabled, CS.lkasHeartbit)
       can_sends.append(new_msg)
     self.wheel_button_control(CC, CS, can_sends, CC.enabled, das_bus, CC.cruiseControl.cancel, CC.cruiseControl.resume)
-
-    # HUD alerts
-    if self.frame % 25 == 0:
-      if CS.lkas_car_model != -1:
-        can_sends.append(chryslercan.create_lkas_hud(self.packer, self.CP, CC.latActive and self.lkas_control_bit_prev, CC.hudControl.visualAlert,
-                                                     self.hud_count, CS.lkas_car_model, CS.auto_high_beam,
-                                                     CC.enabled or CC.jvePilotState.carControl.aolcAvailable, CS.out.cruiseState.available))
-        self.hud_count += 1
-
-    # steering
-    new_steer = int(round(CC.actuators.steer * self.params.STEER_MAX))
-    if self.frame % self.params.STEER_STEP == 0:
-      lkas_control_bit = self.lkas_control_bit_prev
-      if CS.out.vEgo > self.CP.minSteerSpeed or self.steerNoMinimum:
-        lkas_control_bit = CC.latActive
-      elif CS.out.vEgo < (self.CP.minSteerSpeed - self.steer_gap):
-        lkas_control_bit = False
-
-      if self.low_steer and self.lkas_control_bit_prev:
-        # low steer vehicles never turn this off
-        lkas_control_bit = True
-      else:
-        # EPS faults if LKAS enables too quickly
-        if lkas_control_bit and self.lkas_control_bit_prev != lkas_control_bit:
-          if self.next_lkas_control_change == 0:
-            self.next_lkas_control_change = self.frame + 70
-        else:
-          self.next_lkas_control_change = 0
-        lkas_control_bit = lkas_control_bit and (self.frame > self.next_lkas_control_change)
-
-      self.lkas_control_bit_prev = lkas_control_bit
-
-      apply_steer = 0
-      if CC.latActive and lkas_control_bit:
-        apply_steer = apply_meas_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorqueEps, self.params)
-
-      self.apply_steer_last = apply_steer
-
-      can_sends.append(chryslercan.create_lkas_command(self.packer, self.CP, int(apply_steer), lkas_control_bit, CC.latActive))
 
     if CC.enabled:
       # auto set profile
@@ -130,6 +161,7 @@ class CarController(CarControllerBase):
     self.long_controller.acc(self.sm['longitudinalPlan'], self.frame, CC, CS, can_sends)
 
     self.frame += 1
+    self.ccframe += 1
 
     new_actuators = CC.actuators.as_builder()
     new_actuators.steer = self.apply_steer_last / self.params.STEER_MAX
@@ -171,7 +203,6 @@ class CarController(CarControllerBase):
         can_sends.append(new_msg)
 
   def hybrid_acc_button(self, CC, CS):
-    # Move the adaptive curse control to the target speed
     eco_limit = None
     if CC.jvePilotState.carControl.accEco == 1:
       eco_limit = self.cachedParams.get_float('jvePilot.settings.accEco.speedAheadLevel1', 1000)
@@ -231,4 +262,3 @@ class CarController(CarControllerBase):
       self.last_target = new_target
 
     return self.last_target
-
