@@ -158,7 +158,8 @@ class CarState(CarStateBase):
 
       backward = cp.vl["ESP_6"]["MOVING_FORWARD"] == 0 and ret.vEgoRaw > 0
       ret.steerFaultTemporary = cp.vl["EPS_2"]["LKAS_TEMPORARY_FAULT"] == 1 or cp.vl["EPS_2"]["LKAS_STATE"] == 12 or self.above_steer_angle_alert or backward
-      ret.steerFaultPermanent = cp.vl["EPS_2"]["LKAS_STATE"] == 4
+      #ret.steerFaultPermanent = cp.vl["EPS_2"]["LKAS_STATE"] == 4
+      ret.steerFaultPermanent = cp.vl["EPS_2"]["LKAS_STEER_FAULT"] == 4      
 
     # blindspot sensors
     if self.CP.enableBsm:
