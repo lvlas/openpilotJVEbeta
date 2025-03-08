@@ -112,8 +112,8 @@ def create_mango_hud(packer, apa_active, apa_fault, enabled, steer_type):
 def create_lkas_command(packer, apply_steer, lkas_active, counter):
   # LKAS_COMMAND 0x292 (658) Lane-keeping signal to turn the wheel.
   values = {
-    "LKAS_STEERING_TORQUE": apply_steer,
-    "LKAS_HIGH_TORQUE": lkas_active,
+    "STEERING_TORQUE": apply_steer,
+    "LKAS_CONTROL_BIT": lkas_active,
     "COUNTER": counter,
   }
   return packer.make_can_msg("LKAS_COMMAND", 0, values)
