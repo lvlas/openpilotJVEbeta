@@ -4,6 +4,24 @@ from openpilot.selfdrive.car.chrysler.values import RAM_CARS
 GearShifter = car.CarState.GearShifter
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
+def create_mango_hud(packer, apa_active, apa_fault, enabled, steer_type):
+  # LKAS_HUD 0x2a6 (678) Controls what lane-keeping icon is displayed.
+
+  color = 1  # default values are for park or neutral in 2017 are 0 0, but trying 1 1 for 2019
+  lines = 1
+
+  # had color = 1 and lines = 1 but trying 2017 hybrid style for now.
+  if enabled and apa_active:
+      color = 2  # control active, display green.
+  if apa_fault:
+    color = 3
+  values = {
+    "LKAS_ICON_COLOR": color,  # byte 0, last 2 bits
+    "LKAS_LANE_LINES": lines,  # byte 2, last 4 bits
+    "STEER_TYPE": steer_type,
+    }
+  return packer.make_can_msg("LKAS_HUD", 0, values)  # 0x2a6
+
 def create_lkas_hud(packer, CP, lat_active, hud_alert, hud_count, car_model, auto_high_beam, lat_available, cruise_available):
   # LKAS_HUD - Controls what lane-keeping icon is displayed
 
