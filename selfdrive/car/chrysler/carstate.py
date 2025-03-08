@@ -258,6 +258,7 @@ class CarState(CarStateBase):
   @staticmethod
   def get_cam_can_parser(CP):
     messages = [
+      ("LKAS_COMMAND", 100),
       ("DAS_6", 4),
     ]
 
