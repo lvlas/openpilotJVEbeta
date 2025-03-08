@@ -172,13 +172,15 @@ BO_ 669 EPB_1: 3 XXX
  SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 23|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 678 DAS_6: 8 XXX
- SG_ LKAS_ICON_COLOR : 1|2@0+ (1,0) [0|3] "" XXX
- SG_ LKAS_LANE_LINES : 19|4@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_ALERTS : 27|4@0+ (1,0) [0|1] "" XXX
- SG_ CAR_MODEL : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ AUTO_HIGH_BEAM_ON : 47|1@1+ (1,0) [0|0] "" XXX
- SG_ LKAS_DISABLED : 56|1@1+ (1,0) [0|0] "" XXX
+BO_ 678 LKAS_HUD: 8 XXX
+ SG_ LKAS_ICON_COLOR : 2|3@0+ (1,0) [0|3] "" XXX
+ SG_ LKAS_LANE_LINES : 23|8@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_ALERTS : 31|8@0+ (1,0) [0|1] "" XXX
+ SG_ STEER_TYPE : 48|3@1+ (1,0) [0|3] "" XXX
+ SG_ SETTINGS_1 : 12|3@0+ (1,0) [0|7] "" XXX
+ SG_ SETTINGS_2 : 15|3@0+ (1,0) [0|31] "" XXX
+ SG_ LKAS_CHIME_L : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_CHIME_R : 41|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 680 TCM_A7: 8 ECM
  SG_ CurrentGear : 16|4@1+ (1,0) [0|0] ""  ECM,DASM,CBC
