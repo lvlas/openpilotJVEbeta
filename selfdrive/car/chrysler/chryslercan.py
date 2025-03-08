@@ -22,7 +22,7 @@ def create_mango_hud(packer, apa_active, apa_fault, enabled, steer_type):
     }
   return packer.make_can_msg("LKAS_HUD", 0, values)  # 0x2a6
 
-def create_lkas_hud(packer, CP, lat_active, hud_alert, hud_count, car_model, auto_high_beam, lat_available, cruise_available):
+#def create_lkas_hud(packer, CP, lat_active, hud_alert, hud_count, car_model, auto_high_beam, lat_available, cruise_available):
   # LKAS_HUD - Controls what lane-keeping icon is displayed
 
   # == Color ==
@@ -46,30 +46,56 @@ def create_lkas_hud(packer, CP, lat_active, hud_alert, hud_count, car_model, aut
   # 6 place hands on wheel
   # 7 lane departure place hands on wheel
 
-  if hud_alert == VisualAlert.ldw:
-    color = 3
-    lines = 0
-    alerts = 7
-  elif hud_alert == VisualAlert.steerRequired:
-    color = 3
-    lines = 0
-    alerts = 6
-  else:
-    color = 2 if lat_active else 3 if lat_available else 1 if cruise_available else 0
-    lines = 3 if lat_active else 0
-    alerts = 1 if hud_count < (1 * 4) else 0
+#  if hud_alert == VisualAlert.ldw:
+#    color = 3
+#    lines = 0
+#    alerts = 7
+#  elif hud_alert == VisualAlert.steerRequired:
+#    color = 3
+#    lines = 0
+#    alerts = 6
+#  else:
+#    color = 2 if lat_active else 3 if lat_available else 1 if cruise_available else 0
+#    lines = 3 if lat_active else 0
+#    alerts = 1 if hud_count < (1 * 4) else 0
+
+#  values = {
+#    "LKAS_ICON_COLOR": color,
+#    "CAR_MODEL": car_model,
+#    "LKAS_LANE_LINES": lines,
+#    "LKAS_ALERTS": alerts,
+#  }
+
+#  if CP.carFingerprint in RAM_CARS:
+#    values['AUTO_HIGH_BEAM_ON'] = auto_high_beam
+
+#  return packer.make_can_msg("DAS_6", 0, values)
+
+  # LKAS_HUD 0x2a6 (678) Controls what lane-keeping icon is displayed.
+
+  color = 1  # default values are for park or neutral in 2017 are 0 0, but trying 1 1 for 2019
+  lines = 1
+  alerts = 0
+
+  if hud_count < (1 * 4):  # first 3 seconds, 4Hz
+    alerts = 1
+  # had color = 1 and lines = 1 but trying 2017 hybrid style for now.
+  if gear in (GearShifter.drive, GearShifter.reverse, GearShifter.low):
+    if lkas_active:
+      color = 2  # control active, display green.
+      lines = 6
+    else:
+      color = 1  # control off, display white.
+      lines = 1
 
   values = {
-    "LKAS_ICON_COLOR": color,
-    "CAR_MODEL": car_model,
-    "LKAS_LANE_LINES": lines,
-    "LKAS_ALERTS": alerts,
-  }
+    "LKAS_ICON_COLOR": color,  # byte 0, last 2 bits
+    "LKAS_LANE_LINES": lines,  # byte 2, last 4 bits
+    "LKAS_ALERTS": alerts,  # byte 3, last 4 bits
+    "STEER_TYPE": steer_type,
+    }
 
-  if CP.carFingerprint in RAM_CARS:
-    values['AUTO_HIGH_BEAM_ON'] = auto_high_beam
-
-  return packer.make_can_msg("DAS_6", 0, values)
+  return packer.make_can_msg("LKAS_HUD", 0, values)  # 0x2a6
 
 
 def create_lkas_command(packer, CP, apply_steer, lkas_control_bit, wp_active):
