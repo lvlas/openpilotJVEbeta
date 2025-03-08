@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import math
 from common.numpy_fast import clip
 from opendbc.can.packer import CANPacker
@@ -33,7 +34,7 @@ class CarController(CarControllerBase):
     self.last_button_frame = 0
 
     # Additional variables from xps for steering torque
-    self.ccframe = 0  # Added for xps compatibility
+    self.ccframe = 0
     self.gone_fast_yet = False
     self.timer = 0
     self.steerErrorMod = False
@@ -72,7 +73,7 @@ class CarController(CarControllerBase):
     das_bus = 2 if self.CP.carFingerprint in RAM_CARS else 0
     enabled = CC.enabled
 
-    # Steering torque logic from xps
+    # Steering torque logic from xps, modified for AOLC
     wp_type = int(0)
     self.hightorqUnavailable = False
 
@@ -89,7 +90,9 @@ class CarController(CarControllerBase):
     else:
       self.timer = 0
 
-    lkas_active = self.timer == 99 and (self.ccframe >= 500)
+    # Check AOLC state and override strict conditions
+    aolc_enabled = hasattr(CC.jvePilotState.carControl, 'aolcAvailable') and CC.jvePilotState.carControl.aolcAvailable
+    lkas_active = (self.timer == 99 and self.ccframe >= 500) or aolc_enabled  # Allow AOLC to activate immediately
 
     # Steer torque calculation from xps
     new_steer = int(round(CC.actuators.steer * self.params.STEER_MAX))
@@ -101,10 +104,10 @@ class CarController(CarControllerBase):
         self.gone_fast_yet = True
       elif CS.out.vEgo < (self.CP.minSteerSpeed - 3.0):
         self.gone_fast_yet = False
-      lkas_active = moving_fast and enabled
+      lkas_active = (moving_fast and enabled) or aolc_enabled  # Override for AOLC
 
-      if not lkas_active:
-        apply_steer = 0
+    if not lkas_active:
+      apply_steer = 0
 
     self.steer_rate_limited = new_steer != apply_steer
     self.apply_steer_last = apply_steer
@@ -117,20 +120,21 @@ class CarController(CarControllerBase):
     elif CS.out.steerFaultPermanent or CS.out.gearShifter not in (GearShifter.drive, GearShifter.low):
       self.steer_type = int(0)
 
-    if (self.ccframe < 500) or \
+    # Relax hightorqUnavailable for AOLC
+    if (self.ccframe < 500 and not aolc_enabled) or \
        (self.steer_type == int(0) and CS.out.gearShifter in (GearShifter.drive, GearShifter.low) and not CS.out.steerFaultPermanent and self.mango_lat_active):
       self.hightorqUnavailable = True
 
     # CAN messages for steering from xps
     if (self.ccframe % 2 == 0) and wp_type == 2:  # 0.02s period
       new_msg = chryslercan.create_mango_hud(
-          self.packer, False, CS.out.steerFaultPermanent, lkas_active, self.steer_type)  # Simplified, no apaActive/apaFault
+          self.packer, False, CS.out.steerFaultPermanent, lkas_active, self.steer_type)
       can_sends.append(new_msg)
 
     if (self.ccframe % 2 == 0) and wp_type != 2:  # Adjusted to match xps frequency
       new_msg = chryslercan.create_lkas_hud(
           self.packer, self.CP, lkas_active, CC.hudControl.visualAlert, self.hud_count, CS.lkas_car_model, CS.auto_high_beam,
-          CC.enabled or CC.jvePilotState.carControl.aolcAvailable, CS.out.cruiseState.available)
+          CC.enabled or aolc_enabled, CS.out.cruiseState.available)  # Reflect AOLC state
       can_sends.append(new_msg)
 
     if self.ccframe % 25 == 0:
