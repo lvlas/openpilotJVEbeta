@@ -20,7 +20,7 @@ def create_mango_hud(packer, apa_active, apa_fault, enabled, steer_type):
     "LKAS_LANE_LINES": lines,  # byte 2, last 4 bits
     "STEER_TYPE": steer_type,
     }
-  return packer.make_can_msg("LKAS_HUD", 0, values)  # 0x2a6
+  return packer.make_can_msg("DAS_6", 0, values)  # 0x2a6
 
 #def create_lkas_hud(packer, CP, lat_active, hud_alert, hud_count, car_model, auto_high_beam, lat_available, cruise_available):
   # LKAS_HUD - Controls what lane-keeping icon is displayed
@@ -95,7 +95,7 @@ def create_mango_hud(packer, apa_active, apa_fault, enabled, steer_type):
     "STEER_TYPE": steer_type,
     }
 
-  return packer.make_can_msg("LKAS_HUD", 0, values)  # 0x2a6
+  return packer.make_can_msg("DAS_6", 0, values)  # 0x2a6
 
 
 #def create_lkas_command(packer, CP, apply_steer, lkas_control_bit, wp_active):
