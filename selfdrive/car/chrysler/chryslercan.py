@@ -98,14 +98,23 @@ def create_mango_hud(packer, apa_active, apa_fault, enabled, steer_type):
   return packer.make_can_msg("LKAS_HUD", 0, values)  # 0x2a6
 
 
-def create_lkas_command(packer, CP, apply_steer, lkas_control_bit, wp_active):
+#def create_lkas_command(packer, CP, apply_steer, lkas_control_bit, wp_active):
   # LKAS_COMMAND Lane-keeping signal to turn the wheel
-  enabled_val = 2 if CP.carFingerprint in RAM_CARS else 1
+#  enabled_val = 2 if CP.carFingerprint in RAM_CARS else 1
+#  values = {
+#    "WP_CONTROL": 1,
+#    "WP_ACTIVE": 1 if wp_active else 0,
+#    "STEERING_TORQUE": apply_steer,
+#    "LKAS_CONTROL_BIT": enabled_val if lkas_control_bit else 0,
+#  }
+#  return packer.make_can_msg("LKAS_COMMAND", 0, values)
+
+def create_lkas_command(packer, apply_steer, lkas_active, counter):
+  # LKAS_COMMAND 0x292 (658) Lane-keeping signal to turn the wheel.
   values = {
-    "WP_CONTROL": 1,
-    "WP_ACTIVE": 1 if wp_active else 0,
-    "STEERING_TORQUE": apply_steer,
-    "LKAS_CONTROL_BIT": enabled_val if lkas_control_bit else 0,
+    "LKAS_STEERING_TORQUE": apply_steer,
+    "LKAS_HIGH_TORQUE": lkas_active,
+    "COUNTER": counter,
   }
   return packer.make_can_msg("LKAS_COMMAND", 0, values)
 
