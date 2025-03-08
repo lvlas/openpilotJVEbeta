@@ -69,6 +69,8 @@ class CarState(CarStateBase):
       self.check_button(button_events, buttonType, bool(cp.vl[CHECK_BUTTONS[buttonType][0]][CHECK_BUTTONS[buttonType][1]]))
     ret.buttonEvents = button_events
 
+    self.lkas_counter = cp_cam.vl["LKAS_COMMAND"]["COUNTER"]
+
     # lock info
     ret.doorOpen = any([cp.vl["BCM_1"]["DOOR_OPEN_FL"],
                         cp.vl["BCM_1"]["DOOR_OPEN_FR"],
