@@ -150,7 +150,7 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint in RAM_CARS:
       # Auto High Beam isn't Located in this message on chrysler or jeep currently located in 729 message
-      self.auto_high_beam = cp_cam.vl["LKAS_HUD"]['AUTO_HIGH_BEAM_ON'] #LKAS_HUD
+      self.auto_high_beam = cp_cam.vl["DAS_6"]['AUTO_HIGH_BEAM_ON'] #LKAS_HUD
       ret.steerFaultTemporary = cp.vl["EPS_3"]["DASM_FAULT"] == 1
     else:
       if abs(ret.steeringAngleDeg) > 200:
@@ -168,7 +168,7 @@ class CarState(CarStateBase):
       ret.leftBlindspot = cp.vl["BSM_1"]["LEFT_STATUS"] == 1
       ret.rightBlindspot = cp.vl["BSM_1"]["RIGHT_STATUS"] == 1
 
-    self.lkas_car_model = cp_cam.vl["LKAS_HUD"]["CAR_MODEL"] #LKAS_HUD
+    self.lkas_car_model = cp_cam.vl["DAS_6"]["CAR_MODEL"] #LKAS_HUD
     self.button_counter = cp.vl["CRUISE_BUTTONS"]["COUNTER"]
 
     brake = cp.vl["ESP_8"]["BRK_PRESSURE"]
@@ -258,7 +258,7 @@ class CarState(CarStateBase):
   @staticmethod
   def get_cam_can_parser(CP):
     messages = [
-      ("LKAS_HUD", 4),
+      ("DAS_6", 4),
     ]
 
     if CP.carFingerprint in RAM_CARS:
