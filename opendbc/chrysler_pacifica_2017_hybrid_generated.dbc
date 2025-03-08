@@ -183,6 +183,7 @@ BO_ 678 DAS_6: 8 XXX
  SG_ LKAS_CHIME_R : 41|1@1+ (1,0) [0|3] "" XXX
  SG_ AUTO_HIGH_BEAM_ON : 47|1@1+ (1,0) [0|0] "" XXX
  SG_ CAR_MODEL : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ LKAS_DISABLED : 56|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 680 TCM_A7: 8 ECM
  SG_ CurrentGear : 16|4@1+ (1,0) [0|0] ""  ECM,DASM,CBC
