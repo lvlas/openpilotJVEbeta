@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3 aaa
 from cereal import car
 from panda import Panda
 from openpilot.selfdrive.car import get_safety_config
@@ -72,22 +72,28 @@ class CarInterface(CarInterfaceBase):
 
     # Jeep
     elif candidate in (CAR.JEEP_GRAND_CHEROKEE, CAR.JEEP_GRAND_CHEROKEE_2019):
-      ret.steerActuatorDelay = 0.2
+      ret.steerActuatorDelay = 0.08 #nebylo nic
+#
+      #ret.lateralTuning.init('pid')
+      #ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
+      #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15, 0.30], [0.03, 0.05]]
+      #ret.lateralTuning.pid.kf = 0.00006
 
-      if params.get_bool("jvePilot.settings.steer.pid"):
-        ret.lateralTuning.init('pid')
-        #ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
-        #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15, 0.30], [0.03, 0.05]]
-        #ret.lateralTuning.pid.kf = 0.00006
-        #ret.lateralTuning.pid.kiBP = [0.0]
-        ret.lateralTuning.pid.kpBP = [0.0,3.0,10.0]
-        ret.lateralTuning.pid.kpV = [0.019,0.017,0.015]
-        ret.lateralTuning.pid.kiV = [0.0004]
-        ret.lateralTuning.pid.kf = 0.00006
-
-      ret.enableBsm = True
-      ret.experimentalLongitudinalAvailable = True
-
+      #ret.lateralTuning.init('pid')
+      #ret.lateralTuning.pid.kiBP = [0.0]
+      #ret.lateralTuning.pid.kpBP = [0.0,10.0,20.0]
+      #ret.lateralTuning.pid.kpV = [0.019,0.018,0.016]
+      #ret.lateralTuning.pid.kiV = [0.0004]
+      #ret.lateralTuning.pid.kf = 0.00006      
+      #ret.minSteerSpeed = 0.0
+      ret.lateralTuning.init('pid')
+      ret.lateralTuning.pid.kiBP = [0.0]
+      ret.lateralTuning.pid.kpBP = [0.0,3.0,10.0]
+      ret.lateralTuning.pid.kpV = [0.019,0.017,0.015]
+      ret.lateralTuning.pid.kiV = [0.0004]
+      ret.lateralTuning.pid.kf = 0.00006      
+      ret.minSteerSpeed = 0.0
+      
     # Ram
     elif candidate == CAR.RAM_1500_5TH_GEN:
       ret.steerActuatorDelay = 0.2
