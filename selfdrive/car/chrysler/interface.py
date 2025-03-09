@@ -76,8 +76,13 @@ class CarInterface(CarInterfaceBase):
 
       if params.get_bool("jvePilot.settings.steer.pid"):
         ret.lateralTuning.init('pid')
-        ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
-        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15, 0.30], [0.03, 0.05]]
+        #ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
+        #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15, 0.30], [0.03, 0.05]]
+        #ret.lateralTuning.pid.kf = 0.00006
+        #ret.lateralTuning.pid.kiBP = [0.0]
+        ret.lateralTuning.pid.kpBP = [0.0,3.0,10.0]
+        ret.lateralTuning.pid.kpV = [0.019,0.017,0.015]
+        ret.lateralTuning.pid.kiV = [0.0004]
         ret.lateralTuning.pid.kf = 0.00006
 
       ret.enableBsm = True
