@@ -72,12 +72,14 @@ class CarInterface(CarInterfaceBase):
 
     # Jeep
     elif candidate in (CAR.JEEP_GRAND_CHEROKEE, CAR.JEEP_GRAND_CHEROKEE_2019):
-      ret.steerActuatorDelay = 0.1  # Reduced for faster EPS response with parking mod
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-      # Adjusted torque params for full-force steering motor (parking mode mod)
-      ret.lateralTuning.torque.kf = 0.00003  # Reduced to limit torque with amplified EPS
-      ret.lateralTuning.torque.friction = 0.5  # Increased for damping
-      ret.lateralTuning.torque.latAccelFactor = 0.1  # Scaled down for stability
+      ret.steerActuatorDelay = 0.2
+
+      if params.get_bool("jvePilot.settings.steer.pid"):
+        ret.lateralTuning.init('pid')
+        ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
+        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15, 0.30], [0.03, 0.05]]
+        ret.lateralTuning.pid.kf = 0.00006
+
       ret.enableBsm = True
       ret.experimentalLongitudinalAvailable = True
 
