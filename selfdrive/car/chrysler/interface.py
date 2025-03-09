@@ -76,8 +76,8 @@ class CarInterface(CarInterfaceBase):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
       # Adjusted torque params for full-force steering motor (parking mode mod)
       ret.lateralTuning.torque.kf = 0.00003  # Reduced to limit torque with amplified EPS
-      ret.lateralTuning.torque.friction = 0.15  # Increased for damping
-      ret.lateralTuning.torque.latAccelFactor = 0.7  # Scaled down for stability
+      ret.lateralTuning.torque.friction = 0.5  # Increased for damping
+      ret.lateralTuning.torque.latAccelFactor = 0.1  # Scaled down for stability
       ret.enableBsm = True
       ret.experimentalLongitudinalAvailable = True
 
