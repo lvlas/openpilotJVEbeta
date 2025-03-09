@@ -110,8 +110,8 @@ class CarState(CarStateBase):
     # steering wheel
     ret.steeringAngleDeg = cp.vl["STEERING"]["STEERING_ANGLE"] + cp.vl["STEERING"]["STEERING_ANGLE_HP"]
     ret.steeringRateDeg = cp.vl["STEERING"]["STEERING_RATE"]
-    ret.steeringTorque = cp.vl["EPS_2"]["COLUMN_TORQUE"]
-    ret.steeringTorqueEps = cp.vl["EPS_2"]["EPS_TORQUE_MOTOR"]
+    ret.steeringTorque = cp.vl["EPS_2"]["COLUMN_TORQUE"]/4
+    ret.steeringTorqueEps = cp.vl["EPS_2"]["EPS_TORQUE_MOTOR"]/4
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
 
     # cruise state
