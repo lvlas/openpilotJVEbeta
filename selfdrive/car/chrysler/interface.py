@@ -65,11 +65,11 @@ class CarInterface(CarInterfaceBase):
       ret.experimentalLongitudinalAvailable = False
 
     elif candidate in (CAR.JEEP_GRAND_CHEROKEE, CAR.JEEP_GRAND_CHEROKEE_2019):
-      ret.steerActuatorDelay = 0.2
+      ret.steerActuatorDelay = 0.25
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.05, 0.10], [0.005, 0.01]]
-      ret.lateralTuning.pid.kf = 0.00004
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.07, 0.14], [0.02, 0.03]]
+      ret.lateralTuning.pid.kf = 0.00005
       ret.enableBsm = True
       ret.experimentalLongitudinalAvailable = True
 
