@@ -110,7 +110,7 @@ class CarInterface(CarInterfaceBase):
         params.get_float("jvePilot.settings.kiV_2", 0.0010),
       ]
 
-ret.lateralTuning.pid.kf = params.get_float("jvePilot.settings.kf", 0.00007)
+      ret.lateralTuning.pid.kf = params.get_float("jvePilot.settings.kf", 0.00007)
       
       ret.minSteerSpeed = 0.0
       ret.enableBsm = True
