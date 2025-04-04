@@ -144,6 +144,17 @@ JvePilotTogglesPanel::JvePilotTogglesPanel(QWidget *parent) : ListWidget(parent)
         "\nFor example, 0.04 if your device is 4cm left of center."
         "\nNOTE: This is not how far the CAMERA is off-center, but how far the MOUNT/DEVICE is off-center."
     }
+  // PID tuning settings
+    { "jvePilot.settings.kpV_0", 0.0, 0.1, "PID kpV 0", "Tuning value for kpV (low speed)" },
+    { "jvePilot.settings.kpV_1", 0.0, 0.1, "PID kpV 1", "Tuning value for kpV (mid speed)" },
+    { "jvePilot.settings.kpV_2", 0.0, 0.1, "PID kpV 2", "Tuning value for kpV (high speed)" },
+    { "jvePilot.settings.kpV_3", 0.0, 0.1, "PID kpV 3", "Tuning value for kpV (very high speed)" },
+
+    { "jvePilot.settings.kiV_0", 0.0, 0.01, "PID kiV 0", "Tuning value for kiV (low speed)" },
+    { "jvePilot.settings.kiV_1", 0.0, 0.01, "PID kiV 1", "Tuning value for kiV (mid speed)" },
+    { "jvePilot.settings.kiV_2", 0.0, 0.01, "PID kiV 2", "Tuning value for kiV (high speed)" },
+
+    { "jvePilot.settings.kf", 0.0, 0.0002, "PID kf", "Feedforward gain for PID steering control" }
   };
   addItem(new LabelControl("jvePilot Control Settings",
                                   "",
