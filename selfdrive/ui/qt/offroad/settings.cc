@@ -143,7 +143,7 @@ JvePilotTogglesPanel::JvePilotTogglesPanel(QWidget *parent) : ListWidget(parent)
         "Compensate for mounting your device off-center in the windshield."
         "\nFor example, 0.04 if your device is 4cm left of center."
         "\nNOTE: This is not how far the CAMERA is off-center, but how far the MOUNT/DEVICE is off-center."
-    }
+    },
   // PID tuning settings
     { "jvePilot.settings.kpV_0", 0.0, 0.1, "PID kpV 0", "Tuning value for kpV (low speed)" },
     { "jvePilot.settings.kpV_1", 0.0, 0.1, "PID kpV 1", "Tuning value for kpV (mid speed)" },
