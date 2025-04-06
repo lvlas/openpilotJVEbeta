@@ -34,6 +34,27 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs):
+
+
+    default_params = {
+      "jvePilot.settings.kpV_0": 0.025,
+      "jvePilot.settings.kpV_1": 0.018,
+      "jvePilot.settings.kpV_2": 0.017,
+      "jvePilot.settings.kpV_3": 0.019,
+
+      "jvePilot.settings.kiV_0": 0.0008,
+      "jvePilot.settings.kiV_1": 0.0008,
+      "jvePilot.settings.kiV_2": 0.0010,
+
+      "jvePilot.settings.kf": 0.00007,
+    }
+
+  for key, default in default_params.items():
+    if params.get(key) is None:
+      params.put(key, str(default))
+
+
+    
     ret.carName = "chrysler"
     ret.dashcamOnly = candidate in RAM_HD
 
@@ -87,7 +108,7 @@ class CarInterface(CarInterfaceBase):
       #ret.lateralTuning.pid.kf = 0.00006      
       #ret.minSteerSpeed = 0.0
       
-      #ret.lateralTuning.init('pid')
+      ret.lateralTuning.init('pid')
       #ret.lateralTuning.pid.kiBP = [0.0,10.0,18.0]
       #ret.lateralTuning.pid.kpBP = [0.0,3.0,10.0,18.0]
       #ret.lateralTuning.pid.kpV = [0.025,0.018,0.017,0.019]
@@ -98,19 +119,19 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpBP = [0.0, 3.0, 10.0, 18.0]
 
       ret.lateralTuning.pid.kpV = [
-        params.get_float("jvePilot.settings.kpV_0", 0.025),
-        params.get_float("jvePilot.settings.kpV_1", 0.018),
-        params.get_float("jvePilot.settings.kpV_2", 0.017),
-        params.get_float("jvePilot.settings.kpV_3", 0.019),
+        params.get_float("jvePilot.settings.kpV_0", 100),
+        params.get_float("jvePilot.settings.kpV_1", 100),
+        params.get_float("jvePilot.settings.kpV_2", 100),
+        params.get_float("jvePilot.settings.kpV_3", 100),
       ]
 
       ret.lateralTuning.pid.kiV = [
-        params.get_float("jvePilot.settings.kiV_0", 0.0008),
-        params.get_float("jvePilot.settings.kiV_1", 0.0008),
-        params.get_float("jvePilot.settings.kiV_2", 0.0010),
+        params.get_float("jvePilot.settings.kiV_0", 100),
+        params.get_float("jvePilot.settings.kiV_1", 100),
+        params.get_float("jvePilot.settings.kiV_2", 100),
       ]
 
-      ret.lateralTuning.pid.kf = params.get_float("jvePilot.settings.kf", 0.00007)
+      ret.lateralTuning.pid.kf = params.get_float("jvePilot.settings.kf", 100)
       
       ret.minSteerSpeed = 0.0
       ret.enableBsm = True
