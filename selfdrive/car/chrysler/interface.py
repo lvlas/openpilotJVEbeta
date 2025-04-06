@@ -35,7 +35,6 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs):
 
-
     default_params = {
       "jvePilot.settings.kpV_0": 0.025,
       "jvePilot.settings.kpV_1": 0.018,
@@ -49,11 +48,9 @@ class CarInterface(CarInterfaceBase):
       "jvePilot.settings.kf": 0.00007,
     }
 
-  for key, default in default_params.items():
-    if params.get(key) is None:
-      params.put(key, str(default))
-
-
+    for key, default in default_params.items():
+      if params.get(key) is None:
+        params.put(key, str(default))
     
     ret.carName = "chrysler"
     ret.dashcamOnly = candidate in RAM_HD
